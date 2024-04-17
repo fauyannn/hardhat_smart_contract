@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cupcake">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.1/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="container mx-auto">
+        <div class="row">
+            <div class="col-12 p-6">
+                <h1 id="welcome">Hello, </h1>
+                <hr/>
+                <br/>
+                owner: <span id="owner"></span> <br/>
+                textRaw: <span id="textRaw"></span><br/>
+                number: <span id="number"></span>
+                <hr/>
+                <div class="d-flex">
+
+                    <span id="wallet">
+                        <button class="btn btn-success btn-sm" onclick="connect()">
+                            Connect!
+                        </button>
+                    </span>
+                    <button class="btn btn-warning btn-sm" onclick="loadData()">loadData</button>
+                </div>
+                <hr>
+                <br/>
+                <input type="text" id="textValue" class="form-control" placeholder="text raw" />
+                <button class="btn btn-primary btn-sm" onclick="setText()">setText</button>
+                <button class="btn btn-default btn-sm" onclick="inc()">Increment</button>
+                <br/>
+                
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+<script src="abi.js"></script>
+<script>
+    let provider;
+    let account;
+    let hldContract;
+    let smart_contract_address = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; //smart_contract_address
+    async function connect(){
+        await ethereum.request({method: 'eth_requestAccounts'});
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        account = await provider.getSigner().getAddress();
+
+        document.getElementById('welcome').innerText += account;
+        document.getElementById('wallet').classList.add('invisible');
+
+        hldContract = new ethers.Contract(smart_contract_address, abi, provider);
+    }
+
+    async function loadData(){
+        document.getElementById('owner').innerText = await hldContract.getOwner();
+        document.getElementById('textRaw').innerText = await hldContract.textRaw();
+        document.getElementById('number').innerText = await hldContract.number();
+    }
+
+    async function setText(){
+        const textValue = document.getElementById('textValue').value;
+        const hld = await hldContract.connect(await provider.getSigner())
+
+        await hld.setText(textValue)
+        await loadData()
+    }
+    async function inc(){
+        const hld = await hldContract.connect(await provider.getSigner())
+        await hld.inc()
+        await loadData()
+    }
+    window.addEventListener('load', async () => {
+
+    })
+</script>
+</html>
