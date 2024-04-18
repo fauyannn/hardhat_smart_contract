@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 async function main() {
     const HolderFactory = await hre.ethers.getContractFactory('Holder');
-    const hld = await HolderFactory.attach('0x5FbDB2315678afecb367f032d93F642f64180aa3'); //smart contract address
+    const hld = await HolderFactory.attach('0x5fbdb2315678afecb367f032d93f642f64180aa3'); //smart contract address
 
     // await hld.waitForDeployment();
 

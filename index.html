@@ -22,7 +22,7 @@
                 <div class="d-flex">
 
                     <span id="wallet">
-                        <button class="btn btn-success btn-sm" onclick="connect()">
+                        <button class="btn btn-success btn-sm" id="btn-connect" onclick="connect()">
                             Connect!
                         </button>
                     </span>
@@ -45,14 +45,16 @@
     let provider;
     let account;
     let hldContract;
-    let smart_contract_address = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; //smart_contract_address
+    let smart_contract_address = '0x5fbdb2315678afecb367f032d93f642f64180aa3'; //smart_contract_address
+    
     async function connect(){
         await ethereum.request({method: 'eth_requestAccounts'});
         provider = new ethers.providers.Web3Provider(window.ethereum);
         account = await provider.getSigner().getAddress();
 
         document.getElementById('welcome').innerText += account;
-        document.getElementById('wallet').classList.add('invisible');
+        // document.getElementById('wallet').classList.add('invisible');
+        document.getElementById('btn-connect').setAttribute('disabled',true);
 
         hldContract = new ethers.Contract(smart_contract_address, abi, provider);
     }
