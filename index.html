@@ -33,6 +33,8 @@
                 <input type="text" id="textValue" class="form-control" placeholder="text raw" />
                 <button class="btn btn-primary btn-sm" onclick="setText()">setText</button>
                 <button class="btn btn-default btn-sm" onclick="inc()">Increment</button>
+                <button class="btn btn-success btn-sm" onclick="transfer()">Transfer</button>
+                <button class="btn btn-warning btn-sm" onclick="sendMoney()">Send Money</button>
                 <br/>
                 
             </div>
@@ -45,10 +47,17 @@
     let provider;
     let account;
     let hldContract;
-    let smart_contract_address = '0x5fbdb2315678afecb367f032d93f642f64180aa3'; //smart_contract_address
+    let addr = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+    let smart_contract_address = '0x09635F643e140090A9A8Dcd712eD6285858ceBef'; //smart_contract_address
+    let transaction_hash  = '0x620c72f9ec6c1f154c3ada79a430f69de32ba27e7d4d41e5cf2be22070ccfd8e';
+    let wallet;
     
+
+    let recipient;
+
     async function connect(){
         await ethereum.request({method: 'eth_requestAccounts'});
+        
         provider = new ethers.providers.Web3Provider(window.ethereum);
         account = await provider.getSigner().getAddress();
 
@@ -63,6 +72,18 @@
         document.getElementById('owner').innerText = await hldContract.getOwner();
         document.getElementById('textRaw').innerText = await hldContract.textRaw();
         document.getElementById('number').innerText = await hldContract.number();
+
+
+        //const trans = getTransaction(transaction_hash); 
+        
+    }
+
+    async function getTransaction(transaction_hash){
+        const trans =  await provider.getTransactionReceipt(transaction_hash);
+        //const trans = await provider.sendTransaction("Signed Transaction");
+        console.log(trans);
+        return trans;
+        
     }
 
     async function setText(){
@@ -77,6 +98,51 @@
         await hld.inc()
         await loadData()
     }
+
+    async function transfer(){
+        //await ethereum.request({method: 'eth_sendTransaction'});
+        //hldContract = new ethers.Contract(smart_contract_address, abi, provider);
+        
+        const hld = await hldContract.connect(await provider.getSigner())
+        //var receiver = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8' // Account #1
+        var receiver = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' // Account #1
+        const amountInEther = '1'
+        await hld.sendMoney(receiver,1)
+    }
+
+    async function sendMoney() {
+
+        // create the provider to access arbitrum goerli testnet
+        // const provider = new ethers.JsonRpcProvider('https://arbitrum-goerli.public.blastapi.io')
+        provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
+        //provider = new ethers.providers.JsonRpcProvider(ARBITRUM_RPC_URL);
+        
+        // create wallet using private key
+        let private_key = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'; // privat_key pengirim
+        wallet = new ethers.Wallet(private_key, provider) //Account #0: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 // alamat pengirim
+        
+        // the receiver / alamat penerima
+        recipient = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8' // Account #1
+        
+        // const amountInEther = '0.002'
+        const amountInEther = '1'
+        // transaction data, recipient and value in wei
+        const txData = {
+            to: recipient,
+            value: ethers.utils.parseEther(amountInEther)// eth to wei
+        }
+        console.log(`Sending ${amountInEther}eth to ${recipient}`)
+        // send transaction with the wallet
+        const tx = await wallet.sendTransaction(txData)
+        console.log(`Waiting tx... ${tx.hash}`)
+        // wait transaction to confirm at least 1 block
+        const finishedTx = await tx.wait()
+        console.log('Tx executed: '+finishedTx.transactionHash)
+    
+        return finishedTx.hash;
+    }
+
+
     window.addEventListener('load', async () => {
 
     })
